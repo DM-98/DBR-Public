@@ -1,0 +1,131 @@
+﻿@page "/sager/{CreateOrEdit}/{CaseId?}"
+@attribute [Authorize]
+@inherits CancellableComponentBase
+
+@if (!isInvalidPath)
+{
+	<PageTitle>@(CreateOrEdit is "rediger" ? "Rediger sag" : "Opret sag")</PageTitle>
+
+	<div class="container p-3 mb-3 border bg-white col-xs-12 col-sm-10 col-md-8 col-lg-6 col-xxl-4">
+		<h4 class="text-center">@(CreateOrEdit is "rediger" ? "Rediger sag" : "Opret sag")</h4>
+
+		<hr />
+
+		<div class="alert alert-danger fade show @(string.IsNullOrWhiteSpace(errorMessage) ? "d-none" : string.Empty)">
+			<label>@errorMessage</label>
+		</div>
+
+		@if (CreateOrEdit is "rediger")
+		{
+			if (caseToEdit is not null && caseToEdit.Customer is not null && caseToEdit.Customer.Vehicle is not null)
+			{
+				<EditForm Model="caseToEdit" OnValidSubmit="CreateOrEditCaseAsync" Context="updateContext">
+					<ObjectGraphDataAnnotationsValidator />
+					<div class="form-outline">
+						<h4 style="margin-bottom: -10px;"><b>Kunden</b></h4>
+						<LabelDisplay TType="string" For="@(() => caseToEdit!.Customer!.Name)" class="form-label" />
+						<InputText class="form-control" @bind-Value="caseToEdit!.Customer!.Name" />
+						<ValidationMessage For="@(() => caseToEdit!.Customer.Name)" />
+
+						<LabelDisplay TType="string" For="(() => caseToEdit!.Customer!.PhoneNumber)" class="form-label" />
+						<InputText class="form-control" @bind-Value="caseToEdit!.Customer!.PhoneNumber" />
+						<ValidationMessage For="@(() => caseToEdit!.Customer!.PhoneNumber)" />
+
+						<h4 class="mt-4" style="margin-bottom: -10px;"><b>Bilen</b></h4>
+
+						<LabelDisplay TType="string" For="(() => caseToEdit!.Customer!.Vehicle!.LicensePlate)" class="form-label" />
+						<InputText class="form-control" @bind-Value="caseToEdit!.Customer!.Vehicle!.LicensePlate" @oninput="(value) => GetLicensePlateAsync(value)" />
+						<ValidationMessage For="@(() => caseToEdit!.Customer!.Vehicle!.LicensePlate)" />
+						<p style="color: red; margin-top: 6px;">@licensePlateNotFound</p>
+						<span class="spinner-border spinner-border-sm" style="display: block;" hidden="@(!isSearching)"></span>
+
+						<LabelDisplay TType="string" For="(() => caseToEdit!.Customer!.Vehicle!.VIN)" class="form-label" />
+						<InputText class="form-control" @bind-Value="caseToEdit!.Customer!.Vehicle!.VIN" />
+						<ValidationMessage For="@(() => caseToEdit!.Customer!.Vehicle!.VIN)" />
+
+						<LabelDisplay TType="string" For="(() => caseToEdit!.Customer!.Vehicle!.Brand)" class="form-label" />
+						<InputText class="form-control" @bind-Value="caseToEdit!.Customer!.Vehicle!.Brand" />
+						<ValidationMessage For="@(() => caseToEdit!.Customer!.Vehicle!.Brand)" />
+
+						<LabelDisplay TType="string" For="(() => caseToEdit!.Customer!.Vehicle!.Model)" class="form-label" />
+						<InputText class="form-control" @bind-Value="caseToEdit!.Customer!.Vehicle!.Model" />
+						<ValidationMessage For="@(() => caseToEdit!.Customer!.Vehicle!.Model)" />
+
+						<LabelDisplay TType="short?" For="(() => caseToEdit!.Customer!.Vehicle!.Year)" class="form-label" />
+						<InputNumber class="form-control" @bind-Value="caseToEdit!.Customer!.Vehicle!.Year" />
+						<ValidationMessage For="@(() => caseToEdit!.Customer!.Vehicle!.Year)" />
+
+						<LabelDisplay TType="int?" For="(() => caseToEdit!.Customer!.Vehicle!.Kilometers)" class="form-label" />
+						<InputNumber class="form-control" @bind-Value="caseToEdit!.Customer!.Vehicle!.Kilometers" />
+						<ValidationMessage For="@(() => caseToEdit!.Customer!.Vehicle!.Kilometers)" />
+					</div>
+
+					<hr />
+
+					<div class="row p-3 gap-2">
+						<button type="submit" class="btn btn-danger dbr-primary-button w-100 col">Rediger sag</button>
+						<button type="button" @onclick="NavigateBack" class="btn btn-secondary w-100 col">Tilbage</button>
+					</div>
+				</EditForm>
+			}
+		}
+		else
+		{
+			<EditForm Model="caseInputModel" OnValidSubmit="CreateOrEditCaseAsync" Context="createContext">
+				<ObjectGraphDataAnnotationsValidator />
+				<div class="form-outline">
+					<h4 style="margin-bottom: -10px;"><b>Kunden</b></h4>
+					<LabelDisplay TType="string" For="@(() => caseInputModel!.CustomerInputModel!.Name)" class="form-label" />
+					<InputText class="form-control" @bind-Value="caseInputModel!.CustomerInputModel!.Name" />
+					<ValidationMessage For="@(() => caseInputModel.CustomerInputModel.Name)" />
+
+					<LabelDisplay TType="string" For="(() => caseInputModel.CustomerInputModel.PhoneNumber)" class="form-label" />
+					<InputText class="form-control" @bind-Value="caseInputModel.CustomerInputModel.PhoneNumber" />
+					<ValidationMessage For="@(() => caseInputModel.CustomerInputModel.PhoneNumber)" />
+
+					<h4 class="mt-4" style="margin-bottom: -10px;"><b>Bilen</b></h4>
+
+					<LabelDisplay TType="string" For="(() => caseInputModel.VehicleInputModel!.LicensePlate)" class="form-label" />
+					<InputText class="form-control" @bind-Value="caseInputModel.VehicleInputModel!.LicensePlate" @oninput="(value) => GetLicensePlateAsync(value)" />
+					<ValidationMessage For="@(() => caseInputModel.VehicleInputModel.LicensePlate)" />
+					<p style="color: red; margin-top: 6px;">@licensePlateNotFound</p>
+					<span class="spinner-border spinner-border-sm" style="display: block;" hidden="@(!isSearching)"></span>
+
+					<LabelDisplay TType="string" For="(() => caseInputModel.VehicleInputModel.VIN)" class="form-label" />
+					<InputText class="form-control" @bind-Value="caseInputModel.VehicleInputModel.VIN" />
+					<ValidationMessage For="@(() => caseInputModel.VehicleInputModel.VIN)" />
+
+					<LabelDisplay TType="string" For="(() => caseInputModel.VehicleInputModel.Brand)" class="form-label" />
+					<InputText class="form-control" @bind-Value="caseInputModel.VehicleInputModel.Brand" />
+					<ValidationMessage For="@(() => caseInputModel.VehicleInputModel.Brand)" />
+
+					<LabelDisplay TType="string" For="(() => caseInputModel.VehicleInputModel.Model)" class="form-label" />
+					<InputText class="form-control" @bind-Value="caseInputModel.VehicleInputModel.Model" />
+					<ValidationMessage For="@(() => caseInputModel.VehicleInputModel.Model)" />
+
+					<LabelDisplay TType="short?" For="(() => caseInputModel.VehicleInputModel.Year)" class="form-label" />
+					<InputNumber class="form-control" @bind-Value="caseInputModel.VehicleInputModel.Year" />
+					<ValidationMessage For="@(() => caseInputModel.VehicleInputModel.Year)" />
+
+					<LabelDisplay TType="int?" For="(() => caseInputModel.VehicleInputModel.Kilometers)" class="form-label" />
+					<InputNumber class="form-control" @bind-Value="caseInputModel.VehicleInputModel.Kilometers" />
+					<ValidationMessage For="@(() => caseInputModel.VehicleInputModel.Kilometers)" />
+				</div>
+
+				<hr />
+
+				<div class="row p-3 gap-2">
+					<button type="submit" class="btn btn-danger dbr-primary-button w-100 col">Opret sag</button>
+					<button type="button" @onclick="NavigateBack" class="btn btn-secondary w-100 col">Tilbage</button>
+				</div>
+			</EditForm>
+		}
+	</div>
+}
+else
+{
+	<div class="alert alert-danger alert-dismissible fade show @(string.IsNullOrWhiteSpace(errorMessage) ? "d-none" : string.Empty)">
+		<label>@errorMessage</label>
+		<button type="button" class="btn-close" data-bs-dismiss="alert" />
+	</div>
+}

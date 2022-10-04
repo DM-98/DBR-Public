@@ -1,0 +1,77 @@
+﻿@page "/medlemmer/detaljer/{MemberId?}"
+@attribute [Authorize(Roles = "Admin")]
+@inherits CancellableComponentBase
+
+<PageTitle>Medlemsdetaljer</PageTitle>
+
+<div class="alert alert-danger fade show @(string.IsNullOrWhiteSpace(errorMessage) ? "d-none" : string.Empty)">
+	<label>@errorMessage</label>
+</div>
+
+@if (isLoading)
+{
+	<span class="loader"></span>
+}
+else
+{
+	if (memberDetails is not null)
+	{
+		<div class="container p-3 mb-3 border bg-white col-xs-12 col-sm-10 col-md-8 col-lg-6 col-xxl-4">
+			<h4 class="text-center">Medlemsdetaljer</h4>
+
+			<hr />
+
+			<h4><b>Medlemmet</b></h4>
+			<b>Navn:</b><p>@memberDetails.UserName</p>
+			<b>Email:</b><p>@memberDetails.Email</p>
+			<b>Telefonnummer:</b><p>@(string.IsNullOrWhiteSpace(memberDetails.PhoneNumber) ? "Ikke angivet" : memberDetails.PhoneNumber)</p>
+			<b>Oprettet:</b> <p>@memberDetails.CreatedDate.FormatTime()</p>
+			<b>Sidst ændring:</b> <p>@memberDetails.UpdatedDate.FormatTime()</p>
+
+			<h4><b>Medlemmets værksted</b></h4>
+
+			@if (memberDetails.WorkshopId is null)
+			{
+				<i>Ingen</i>
+			}
+			else 
+			{
+				<b>Navn:</b> <p>@memberDetails.Workshop?.Name</p>
+				<b>Gadenavn og husnummer:</b> <p>@memberDetails.Workshop?.Address?.Street</p>
+				<b>By:</b> <p>@memberDetails.Workshop?.Address?.City</p>
+				<b>Postnummer:</b> <p>@memberDetails.Workshop?.Address?.PostCode</p>
+
+				string? specializationsString = "";
+
+				if (memberDetails.Workshop?.Specializations is not null)
+				{
+					List<string> specializations = new();
+
+					foreach (SpecializationDTO specialization in memberDetails.Workshop?.Specializations!)
+					{
+						specializations.Add(specialization.Name);
+					}
+
+					specializationsString = string.Join(", ", specializations);
+				}
+
+				<b>Specialiseringer:</b>
+				@if (string.IsNullOrWhiteSpace(specializationsString))
+				{
+					<p><i>Ingen</i></p>
+				}
+				else
+				{
+					<p>@specializationsString</p>
+				}
+			}
+			
+			<hr />
+
+			<div class="row p-3 gap-2">
+				<button @onclick="NavigateToEditMember" class="btn btn-danger dbr-primary-button w-100 col">Rediger</button>
+				<button @onclick="NavigateBack" class="btn btn-secondary w-100 col">Tilbage</button>
+			</div>
+		</div>
+	}
+}

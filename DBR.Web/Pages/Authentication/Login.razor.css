@@ -1,0 +1,8 @@
+﻿.bg-dbr-primary {
+	background: linear-gradient(to top left, #800000 0%, #ab2430 80%);
+}
+
+.dbr-login {
+	border-radius: 1rem;
+	box-shadow: 2px 5px #660000;
+}

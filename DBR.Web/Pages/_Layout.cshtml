@@ -1,0 +1,39 @@
+﻿@using Microsoft.AspNetCore.Components.Web
+@namespace DBR.Web.Pages
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="~/" />
+	<link rel="shortcut icon" type="image/svg" href="~/images/favicon.png" />
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs5/jq-3.6.0/jszip-2.5.0/dt-1.12.1/b-2.2.3/b-html5-2.2.3/b-print-2.2.3/r-2.3.0/datatables.min.css" />
+	<link rel="stylesheet" type="text/css" href="~/css/bootstrap.min.css" />
+	<link rel="stylesheet" type="text/css" href="~/css/site.css" />
+	<link rel="stylesheet" type="text/css" href="DBR.Web.styles.css" />
+    <component type="typeof(HeadOutlet)" render-mode="Server" />
+</head>
+<body>
+    @RenderBody()
+
+    <div id="blazor-error-ui">
+        <environment include="Staging,Production">
+            An error has occurred. This application may no longer respond until reloaded.
+        </environment>
+        <environment include="Development">
+            An unhandled exception has occurred. See browser dev tools for details.
+        </environment>
+        <a href="" class="reload">Reload</a>
+        <a class="dismiss">🗙</a>
+    </div>
+
+    <script src="_framework/blazor.server.js"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+	<script type="text/javascript" src="https://cdn.datatables.net/v/bs5/jq-3.6.0/jszip-2.5.0/dt-1.12.1/b-2.2.3/b-html5-2.2.3/b-print-2.2.3/r-2.3.0/datatables.min.js"></script>
+	<script type="text/javascript" src="~/js/bootstrap.bundle.min.js"></script>
+	<script src="~/js/dbr.js"></script>
+</body>
+</html>

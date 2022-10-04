@@ -1,0 +1,36 @@
+﻿@* Source: https://stackoverflow.com/a/59791506/9133374 *@
+
+@typeparam TType
+
+<label @attributes="AdditionalAttributes" class="mt-3">@label</label>
+
+@code {
+	[Parameter]
+	public Expression<Func<TType>> For { get; set; } = null!;
+
+	[Parameter(CaptureUnmatchedValues = true)]
+	public IDictionary<string, object>? AdditionalAttributes { get; set; }
+
+	private string label => GetDisplayName();
+
+	private string GetDisplayName()
+	{
+		MemberExpression? expression = For.Body as MemberExpression;
+
+		if (expression is not null)
+		{
+			DisplayAttribute? value = expression.Member.GetCustomAttribute(typeof(DisplayAttribute)) as DisplayAttribute;
+
+			if (value is not null)
+			{
+				return value.Name ?? "";
+			}
+			else 
+			{
+				return expression.Member.Name;
+			}
+		}
+
+		return "";
+	}
+}

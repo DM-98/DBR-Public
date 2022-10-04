@@ -1,0 +1,67 @@
+﻿<div class="top-row ps-3 navbar navbar-light bg-light">
+	<div class="container-fluid">
+		<a class="navbar-brand" href="/">
+			<img src="/images/DBR.svg" height="50" width="170" />
+		</a>
+		<button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+	</div>
+</div>
+
+<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+	<nav class="flex-column">
+		<AuthorizeView>
+			<Authorized>
+				<div class="nav-item px-3">
+					<NavLink class="nav-link" style="font-size:1.3em;" href="/sager" Match="NavLinkMatch.Prefix">
+						<span class="oi oi-people" style="margin-left:1em;" aria-hidden="true"></span> Sager
+					</NavLink>
+				</div>
+				@if (context.User.IsInRole("Admin"))
+				{
+					<hr />
+					<div class="nav-item px-3">
+						<NavLink class="nav-link" style="font-size:1.3em;" href="/eksport" Match="NavLinkMatch.All">
+							<span class="oi oi-data-transfer-download" style="margin-left:1em;" aria-hidden="true"></span> Eksport
+						</NavLink>
+					</div>
+					<div class="nav-item px-3">
+						<NavLink class="nav-link" style="font-size:1.3em;" href="/værksteder" Match="NavLinkMatch.Prefix">
+							<span class="oi oi-list" style="margin-left:1em;" aria-hidden="true"></span> Værksteder
+						</NavLink>
+					</div>
+					<div class="nav-item px-3">
+						<NavLink class="nav-link" style="font-size:1.3em;" href="/medlemmer" Match="NavLinkMatch.Prefix">
+							<span class="oi oi-person" style="margin-left:1em;" aria-hidden="true"></span> Medlemmer
+						</NavLink>
+					</div>
+				}
+				<hr />
+				<div class="nav-item px-3">
+					<NavLink class="btn btn-outline-danger nav-link" style="font-size:1.3em;" href="log-ud" Match="NavLinkMatch.All">
+						<span class="oi oi-account-logout" style="margin-left:1em; padding-right:1.1em;" aria-hidden="true"></span> Log ud
+					</NavLink>
+				</div>
+			</Authorized>
+			<NotAuthorized>
+				<div class="nav-item px-3">
+					<NavLink class="nav-link disabled" style="font-size:1.3em;" href="/sager" Match="NavLinkMatch.Prefix">
+						<span class="oi oi-people" style="margin-left:1em;" aria-hidden="true"></span> <i>Sager (log ind)</i>
+					</NavLink>
+				</div>
+			</NotAuthorized>
+		</AuthorizeView>
+	</nav>
+</div>
+
+@code {
+	private bool collapseNavMenu = true;
+
+	private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+	private void ToggleNavMenu()
+	{
+		collapseNavMenu = !collapseNavMenu;
+	}
+}

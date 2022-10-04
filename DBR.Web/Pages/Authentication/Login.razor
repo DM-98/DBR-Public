@@ -1,0 +1,49 @@
+﻿@page "/log-ind"
+
+<PageTitle>Log ind</PageTitle>
+
+<div class="container">
+	<div class="row d-flex justify-content-center align-items-center">
+		<div class="col-12 col-md-8 col-lg-6 col-xl-5">
+			<div class="card text-white mb-4 bg-dbr-primary dbr-login">
+				<div class="card-body p-4 text-center">
+					<div class="mb-md-5 mt-md-4 pb-2">
+						<EditForm Model="loginInputModel" OnValidSubmit="LoginAsync">
+							<DataAnnotationsValidator />
+
+							<label><h2 class="fw-bold mb-2 text-uppercase">Log ind</h2></label>
+
+							<hr />
+
+							<div class="alert alert-danger fade show @(string.IsNullOrWhiteSpace(errorMessage) ? "d-none" : string.Empty)">
+								<label>@errorMessage</label>
+							</div>
+
+							<div class="form-outline form-white mb-4">
+								<LabelDisplay class="form-label" For="(() => loginInputModel.Email)" />
+								<InputText type="email" @bind-Value="loginInputModel.Email" class="form-control form-control-lg" />
+								<ValidationMessage For="@(() => loginInputModel.Email)" />
+							</div>
+
+							<div class="form-outline form-white mb-4">
+								<LabelDisplay class="form-label" For="(() => loginInputModel.Password)" />
+								<InputText type="password" @bind-Value="loginInputModel.Password" class="form-control form-control-lg" />
+								<ValidationMessage For="@(() => loginInputModel.Password)" />
+							</div>
+
+							<div class="form-outline form-white mb-4">
+								<InputCheckbox type="checkbox" class="form-check-input" id="rememberme" @bind-Value="loginInputModel.RememberMe" />
+								<label class="form-check-label" for="rememberme">Forbliv logget ind</label>
+							</div>
+
+							<button class="btn btn-outline-light btn-lg px-5 w-100 @(isLoading ? "disabled" : string.Empty)" type="submit">
+								<span class="spinner-border spinner-border-sm mr-1 @(isLoading ? string.Empty : "d-none")" />
+								Log ind
+							</button>
+						</EditForm>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

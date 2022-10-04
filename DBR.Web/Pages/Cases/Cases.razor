@@ -1,0 +1,54 @@
+﻿@page "/sager"
+@attribute [Authorize]
+@inherits CancellableComponentBase
+
+<PageTitle>Sager</PageTitle>
+
+@if (isLoading)
+{
+	<span class="loader"></span>
+}
+else
+{
+	<div class="container-fluid p-3 mb-3 border bg-white">
+		<div class="alert alert-danger fade show @(string.IsNullOrWhiteSpace(errorMessage) ? "d-none" : string.Empty)">
+			<label>@errorMessage</label>
+		</div>
+
+		@if (!memberWorkshopId.HasValue)
+		{
+			<h4>Du er ikke tilknyttet nogen værksted. Kontakt en administrator for at anmode om at blive tilknyttet.</h4>
+		}
+		else
+		{
+			<h4>Sager på dit værksted (@cases.Count)</h4>
+			<a class="btn dbr-primary-button" href="sager/opret">Opret ny sag</a>
+
+			<hr />
+
+			<div class="alert alert-danger alert-dismissible fade show @(string.IsNullOrWhiteSpace(errorMessage) ? "d-none" : string.Empty)">
+				<label>@errorMessage</label>
+			</div>
+
+			@if (isReadyToDisplay)
+			{
+				<DataTable Items="cases" Headers="headerNames" TItem="CaseDTO">
+					<Columns>
+						@context
+					</Columns>
+					<Rows>
+						<td class="fw-bold" style="color: @(context.Status is CaseStatus.Active ? "green" : "#990000")">@(context.Status is CaseStatus.Active ? "Aktiv" : "Lukket")</td>
+						<td>@context.Customer?.Name</td>
+						<td>@context.Customer?.PhoneNumber</td>
+						<td>@context.Customer?.Vehicle?.LicensePlate</td>
+						<td>@context.Customer?.Vehicle?.VIN</td>
+						<td>@context.Customer?.Vehicle?.Model</td>
+						<td>@context.Customer?.Vehicle?.Brand</td>
+						<td>@context.Customer?.Vehicle?.Year</td>
+						<td><a href="sager/detaljer/@context.Id"><img src="images/details.svg" width="25" height="20" class="case-details-image" /></a></td>
+					</Rows>
+				</DataTable>
+			}
+		}
+	</div>
+}

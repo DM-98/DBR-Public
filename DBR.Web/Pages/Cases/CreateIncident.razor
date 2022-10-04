@@ -1,0 +1,56 @@
+﻿@page "/sager/detaljer/{CaseId}/opret-hændelse"
+@attribute [Authorize]
+@inherits CancellableComponentBase
+
+<div class="alert alert-danger fade show @(string.IsNullOrWhiteSpace(errorMessage) ? "d-none" : string.Empty)">
+	<label>@errorMessage</label>
+</div>
+
+@if (!isInvalidPath)
+{
+	<PageTitle>Opret hændelse</PageTitle>
+
+	<div class="container p-3 mb-3 border bg-white col-xs-12 col-sm-10 col-md-8 col-lg-6 col-xxl-4">
+		<h4 class="text-center">Opret hændelse</h4>
+
+		<hr />
+
+		<EditForm Model="incidentInputModel" OnValidSubmit="CreateIncidentAsync">
+			<DataAnnotationsValidator />
+			<div class="form-outline">
+				<LabelDisplay TType="IncidentType" For="@(() => incidentInputModel.Type)" class="form-label" />
+				<InputSelect class="form-select" @bind-Value="incidentInputModel.Type">
+					<option value="@IncidentType.InfoIntern">@IncidentType.InfoIntern.EnumToString()</option>
+					<option value="@IncidentType.InfoCustomer">@IncidentType.InfoCustomer.EnumToString()</option>
+					<option value="@IncidentType.QuestionCustomer">@IncidentType.QuestionCustomer.EnumToString()</option>
+					<option value="@IncidentType.Invoice">@IncidentType.Invoice.EnumToString()</option>
+				</InputSelect>
+
+				<LabelDisplay TType="string" For="@(() => incidentInputModel.Description)" class="form-label" />
+				<InputText class="form-control" @bind-Value="incidentInputModel.Description" />
+				<ValidationMessage For="@(() => incidentInputModel.Description)" />
+
+				<p class="form-label mt-3">Bilag</p>
+				<InputFile OnChange="OnInputFileChange" class="form-control" type="file" accept="@(incidentInputModel.Type is IncidentType.Invoice ? ".pdf, .doc, .docx, .txt, .xlsx, .ppt, .pptx" : ".png, .jpg, .jpeg, .mov, .mp4")" multiple />
+			</div>
+
+			<hr />
+
+			@if (isLoading)
+			{
+				<div class="pb-5 pt-5">
+					<span class="loader loader-incident"></span>
+				</div>
+			}
+
+			<div class="row p-3 gap-2">
+				<button type="submit" class="btn btn-danger dbr-primary-button w-100 col @(isLoading ? "disabled" : string.Empty)">
+					<span class="spinner-border spinner-border-sm mr-1 @(isLoading ? string.Empty : "d-none")" />
+					Opret hændelse
+				</button>
+
+				<button type="button" @onclick="NavigateBack" class="btn btn-secondary w-100 col">Tilbage</button>
+			</div>
+		</EditForm>
+	</div>
+}

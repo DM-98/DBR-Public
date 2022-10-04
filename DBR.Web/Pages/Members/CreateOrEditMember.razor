@@ -1,0 +1,126 @@
+﻿@page "/medlemmer/{CreateOrEdit}/{MemberId?}"
+@attribute [Authorize(Roles = "Admin")]
+@inherits CancellableComponentBase
+
+@if (!isInvalidPath)
+{
+	<PageTitle>@(CreateOrEdit is "rediger" ? "Rediger medlem" : "Opret medlem")</PageTitle>
+
+	<div class="container p-3 mb-3 border bg-white col-xs-12 col-sm-10 col-md-8 col-lg-6 col-xxl-4">
+		<h4 class="text-center">@(CreateOrEdit is "rediger" ? "Rediger medlem" : "Opret medlem")</h4>
+
+		<hr />
+
+		<div class="alert alert-danger fade show @(string.IsNullOrWhiteSpace(errorMessage) ? "d-none" : string.Empty)">
+			<label>@errorMessage</label>
+		</div>
+
+		@if (CreateOrEdit is "rediger")
+		{
+			if (memberToEdit is not null)
+			{
+				<EditForm Model="memberToEdit" OnValidSubmit="CreateOrEditMemberAsync" Context="updateContext">
+					<DataAnnotationsValidator />
+					<div class="form-outline">
+						<p class="form-label">Navn*</p>
+						<InputText class="form-control" @bind-Value="memberToEdit.UserName" />
+						<ValidationMessage For="@(() => memberToEdit.UserName)" />
+
+						<p class="form-label mt-3">Email*</p>
+						<InputText class="form-control" @bind-Value="memberToEdit.Email" />
+						<ValidationMessage For="@(() => memberToEdit.Email)" />
+
+						<p class="form-label mt-3">Telefonnummer</p>
+						<InputText class="form-control" @bind-Value="memberToEdit.PhoneNumber" />
+						<ValidationMessage For="@(() => memberToEdit.PhoneNumber)" />
+
+						<h4 class="mt-4"><b>Forbind medlem til et værksted</b></h4>
+
+						<InputSelect class="form-select" @bind-Value="memberToEdit.WorkshopId">
+							@if (memberToEdit.WorkshopId is null)
+							{
+								<option selected value="">Ingen</option>
+							}
+							@foreach (WorkshopDTO workshop in workshops)
+							{
+								<option value="@workshop.Id">@workshop.Name</option>
+							}
+							@if (memberToEdit.WorkshopId is not null)
+							{
+								<option value="">Ingen</option>
+							}
+						</InputSelect>
+					</div>
+
+					<hr />
+
+					<div class="row p-3 gap-2">
+						<button type="submit" class="btn btn-danger dbr-primary-button w-100 col">Rediger medlem</button>
+						<button type="button" @onclick="NavigateBack" class="btn btn-secondary w-100 col">Tilbage</button>
+					</div>
+				</EditForm>
+			}
+		}
+		else
+		{
+			<EditForm Model="memberInputModel" OnValidSubmit="CreateOrEditMemberAsync" Context="createContext">
+				<DataAnnotationsValidator />
+				<div class="form-outline">
+					<LabelDisplay TType="string" For="@(() => memberInputModel.Name)" class="form-label" />
+					<InputText class="form-control" @bind-Value="memberInputModel.Name" />
+					<ValidationMessage For="@(() => memberInputModel.Name)" />
+
+					<LabelDisplay TType="string" For="@(() => memberInputModel.Email)" class="form-label" />
+					<InputText class="form-control" @bind-Value="memberInputModel.Email" />
+					<ValidationMessage For="@(() => memberInputModel.Email)" />
+
+					<LabelDisplay TType="string" For="@(() => memberInputModel.PhoneNumber)" class="form-label" />
+					<InputText class="form-control" @bind-Value="memberInputModel.PhoneNumber" />
+					<ValidationMessage For="@(() => memberInputModel.PhoneNumber)" />
+
+					<LabelDisplay TType="string" For="@(() => memberInputModel.Password)" class="form-label" />
+					<InputText type="password" class="form-control" @bind-Value="memberInputModel.Password" />
+					<ValidationMessage For="@(() => memberInputModel.Password)" />
+
+					<LabelDisplay TType="string" For="@(() => memberInputModel.ConfirmPassword)" class="form-label" />
+					<InputText type="password" class="form-control" @bind-Value="memberInputModel.ConfirmPassword" />
+					<ValidationMessage For="@(() => memberInputModel.ConfirmPassword)" />
+
+					<LabelDisplay TType="bool" For="@(() => memberInputModel.IsTermsAccepted)" class="form-label" />
+					<InputCheckbox type="checkbox" class="form-check-input" @bind-Value="memberInputModel.IsTermsAccepted" />
+					<ValidationMessage For="@(() => memberInputModel.IsTermsAccepted)" />
+
+					<h4 class="mt-4"><b>Forbind medlem til et værksted</b></h4>
+
+					<InputSelect class="form-select" @bind-Value="memberInputModel.WorkshopId">
+						@if (memberInputModel.WorkshopId is null)
+						{
+							<option selected value="">Ingen</option>
+						}
+						@foreach (WorkshopDTO workshop in workshops)
+						{
+							<option value="@workshop.Id">@workshop.Name</option>
+						}
+						@if (memberInputModel.WorkshopId is not null)
+						{
+							<option value="">Ingen</option>
+						}
+					</InputSelect>
+				</div>
+
+				<hr />
+
+				<div class="row p-3 gap-2">
+					<button type="submit" class="btn btn-danger dbr-primary-button w-100 col">Opret medlem</button>
+					<button type="button" @onclick="NavigateBack" class="btn btn-secondary w-100 col">Tilbage</button>
+				</div>
+			</EditForm>
+		}
+	</div>
+}
+else
+{
+	<div class="alert alert-danger fade show @(string.IsNullOrWhiteSpace(errorMessage) ? "d-none" : string.Empty)">
+		<label>@errorMessage</label>
+	</div>
+}

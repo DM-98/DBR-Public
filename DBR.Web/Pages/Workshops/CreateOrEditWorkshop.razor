@@ -1,0 +1,104 @@
+﻿@page "/værksteder/{CreateOrEdit}/{WorkshopId?}"
+@attribute [Authorize(Roles = "Admin")]
+@inherits CancellableComponentBase
+
+@if (!isInvalidPath)
+{
+	<PageTitle>@(CreateOrEdit is "rediger" ? "Rediger værksted" : "Opret værksted")</PageTitle>
+
+	<div class="container-fluid p-3 mt-3 mb-3 border bg-white col-xs-12 col-sm-10 col-md-8 col-lg-6 col-xxl-4 mb-4">
+		<h4 class="text-center">@(CreateOrEdit is "rediger" ? "Rediger værksted" : "Opret værksted")</h4>
+
+		<hr />
+
+		<div class="alert alert-danger fade show @(string.IsNullOrWhiteSpace(errorMessage) ? "d-none" : string.Empty)">
+			<label>@errorMessage</label>
+		</div>
+
+		@if (CreateOrEdit is "rediger")
+		{
+			if (workshopToEdit is not null)
+			{
+				<EditForm Model="workshopToEdit" OnValidSubmit="CreateOrEditWorkshopAsync" Context="updateContext">
+					<ObjectGraphDataAnnotationsValidator />
+					<div class="form-outline">
+						<h4 style="margin-bottom: -10px;"><b>Værkstedet</b></h4>
+
+						<LabelDisplay TType="string" For="@(() => workshopToEdit.Name)" class="form-label" />
+						<InputText class="form-control" @bind-Value="workshopToEdit.Name" />
+						<ValidationMessage For="@(() => workshopToEdit.Name)" />
+
+						<LabelDisplay TType="string" For="@(() => workshopToEdit.PhoneNumber)" class="form-label" />
+						<InputText class="form-control" @bind-Value="workshopToEdit.PhoneNumber" />
+						<ValidationMessage For="@(() => workshopToEdit.PhoneNumber)" />
+
+						<h4 class="mt-4" style="margin-bottom: -10px;"><b>Beliggenheden</b></h4>
+
+						<LabelDisplay TType="string" For="@(() => workshopToEdit.Address!.Street)" class="form-label" />
+						<InputText class="form-control" @bind-Value="workshopToEdit.Address!.Street" />
+						<ValidationMessage For="@(() => workshopToEdit.Address!.Street)" />
+
+						<LabelDisplay TType="string" For="(() => workshopToEdit.Address!.City)" class="form-label" />
+						<InputText class="form-control" @bind-Value="workshopToEdit.Address!.City" />
+						<ValidationMessage For="@(() => workshopToEdit.Address!.City)" />
+
+						<LabelDisplay TType="short?" For="(() => workshopToEdit.Address!.PostCode)" class="form-label" />
+						<InputNumber class="form-control" @bind-Value="workshopToEdit.Address!.PostCode" />
+						<ValidationMessage For="@(() => workshopToEdit.Address!.PostCode)" />
+					</div>
+
+					<hr />
+
+					<div class="row p-3 gap-2">
+						<button type="submit" class="btn btn-danger dbr-primary-button col">Rediger værksted</button>
+						<button type="button" @onclick="NavigateBack" class="btn btn-secondary col">Annuller</button>
+					</div>
+				</EditForm>
+			}
+		}
+		else
+		{
+			<EditForm Model="workshopInputModel" OnValidSubmit="CreateOrEditWorkshopAsync" Context="createContext">
+				<ObjectGraphDataAnnotationsValidator />
+				<div class="form-outline">
+					<h4 style="margin-bottom: -10px;"><b>Værkstedet</b></h4>
+
+					<LabelDisplay TType="string" For="@(() => workshopInputModel.Name)" class="form-label" />
+					<InputText class="form-control" @bind-Value="workshopInputModel.Name" />
+					<ValidationMessage For="@(() => workshopInputModel.Name)" />
+
+					<LabelDisplay TType="string" For="@(() => workshopInputModel.PhoneNumber)" class="form-label" />
+					<InputText class="form-control" @bind-Value="workshopInputModel.PhoneNumber" />
+					<ValidationMessage For="@(() => workshopInputModel.PhoneNumber)" />
+
+					<h4 class="mt-4" style="margin-bottom: -10px;"><b>Beliggenhed</b></h4>
+
+					<LabelDisplay TType="string" For="@(() => workshopInputModel.AddressInputModel.Street)" class="form-label" />
+					<InputText class="form-control" @bind-Value="workshopInputModel.AddressInputModel.Street" />
+					<ValidationMessage For="@(() => workshopInputModel.AddressInputModel.Street)" />
+
+					<LabelDisplay TType="string" For="(() => workshopInputModel.AddressInputModel.City)" class="form-label" />
+					<InputText class="form-control" @bind-Value="workshopInputModel.AddressInputModel.City" />
+					<ValidationMessage For="@(() => workshopInputModel.AddressInputModel.City)" />
+
+					<LabelDisplay TType="short?" For="(() => workshopInputModel.AddressInputModel.PostCode)" class="form-label" />
+					<InputNumber class="form-control" @bind-Value="workshopInputModel.AddressInputModel.PostCode" />
+					<ValidationMessage For="@(() => workshopInputModel.AddressInputModel.PostCode)" />
+				</div>
+
+				<hr />
+
+				<div class="row p-3 gap-2">
+					<button type="submit" class="btn btn-danger dbr-primary-button col">Opret værksted</button>
+					<button type="button" @onclick="NavigateBack" class="btn btn-secondary col">Annuller</button>
+				</div>
+			</EditForm>
+		}
+	</div>
+}
+else
+{
+	<div class="alert alert-danger fade show @(string.IsNullOrWhiteSpace(errorMessage) ? "d-none" : string.Empty)">
+		<label>@errorMessage</label>
+	</div>
+}

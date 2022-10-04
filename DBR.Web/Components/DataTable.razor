@@ -1,0 +1,45 @@
+﻿@inject IJSRuntime jsRuntime
+@typeparam TItem
+
+<div onbeforeunload="destroyDataTable('#datatable_id')">
+	<table id="datatable_id" class="table table-striped table-hover table-bordered display pt-2" style="width: 100%">
+		<thead style="background-color: #c6c6c6">
+			<tr>
+				@foreach (string header in Headers)
+				{
+					<th>@Columns(header)</th>
+				}
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (TItem item in Items)
+			{
+				<tr>
+					@Rows(item)
+				</tr>
+			}
+		</tbody>
+	</table>
+</div>
+
+@code {
+	[Parameter]
+	public IEnumerable<string> Headers { get; set; } = null!;
+
+	[Parameter]
+	public IEnumerable<TItem> Items { get; set; } = null!;
+
+	[Parameter]
+	public RenderFragment<string> Columns { get; set; } = null!;
+
+	[Parameter]
+	public RenderFragment<TItem> Rows { get; set; } = null!;
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			await jsRuntime.InvokeAsync<object>("initializeDataTable", "#datatable_id");
+		}
+	}
+}

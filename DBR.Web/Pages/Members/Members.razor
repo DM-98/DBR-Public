@@ -1,0 +1,44 @@
+﻿@page "/medlemmer"
+@attribute [Authorize(Roles = "Admin")]
+@inherits CancellableComponentBase
+
+<PageTitle>Medlemmer</PageTitle>
+
+@if (isLoading)
+{
+	<span class="loader"></span>
+}
+else
+{
+	<div class="container-fluid p-3 mb-3 border bg-white">
+		<div class="alert alert-danger fade show @(string.IsNullOrWhiteSpace(errorMessage) ? "d-none" : string.Empty)">
+			<label>@errorMessage</label>
+		</div>
+
+		<h4>Medlemmer registreret i systemet (@members.Count)</h4>
+		<a class="btn dbr-primary-button" href="medlemmer/opret">Opret nyt medlem</a>
+
+		<hr />
+
+		<div class="alert alert-danger alert-dismissible fade show @(string.IsNullOrWhiteSpace(errorMessage) ? "d-none" : string.Empty)">
+			<label>@errorMessage</label>
+		</div>
+
+		@if (isReadyToDisplay)
+		{
+			<DataTable Items="members" Headers="headerNames" TItem="MemberDTO">
+				<Columns>
+					@context
+				</Columns>
+				<Rows>
+					<td>@context.UserName</td>
+					<td>@context.Email</td>
+					<td>@(string.IsNullOrWhiteSpace(context.PhoneNumber) ? "Ikke angivet" : context.PhoneNumber)</td>
+					<td>@(string.IsNullOrWhiteSpace(context.Workshop?.Name) ? "Ingen" : context.Workshop?.Name)</td>
+					<td>@context.CreatedDate.FormatTime()</td>
+					<td><a href="medlemmer/detaljer/@context.Id"><img src="images/details.svg" width="25" height="20" class="case-details-image" /></a></td>
+				</Rows>
+			</DataTable>
+		}
+	</div>
+}

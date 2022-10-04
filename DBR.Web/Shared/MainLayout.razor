@@ -1,0 +1,19 @@
+﻿@inherits LayoutComponentBase
+
+<PageTitle>DBR</PageTitle>
+
+<div class="page">
+	<AuthorizeView>
+		<Authorized>
+			<div class="gradient-custom sidebar">
+				<NavMenu />
+			</div>
+		</Authorized>
+	</AuthorizeView>
+
+	<main>
+		<article class="content px-4">
+			@Body
+		</article>
+	</main>
+</div>

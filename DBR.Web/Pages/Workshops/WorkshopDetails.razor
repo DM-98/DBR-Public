@@ -1,0 +1,94 @@
+﻿@page "/værksteder/detaljer/{WorkshopId?}"
+@attribute [Authorize(Roles = "Admin")]
+@inherits CancellableComponentBase
+
+<PageTitle>Værkstedsdetaljer</PageTitle>
+
+<div class="alert alert-danger fade show @(string.IsNullOrWhiteSpace(errorMessage) ? "d-none" : string.Empty)">
+	<label>@errorMessage</label>
+</div>
+
+@if (isLoading)
+{
+	<span class="loader"></span>
+}
+else
+{
+	if (workshopDetails is not null)
+	{
+		<div class="container p-3 mb-3 border bg-white col-xs-12 col-sm-10 col-md-8 col-lg-6 col-xxl-4">
+			<h4 class="text-center">Værkstedsdetaljer</h4>
+
+			<hr />
+
+			<h4><b>Værkstedet</b></h4>
+
+			<b>Navn:</b><p>@workshopDetails.Name</p>
+			<b>Telefonnummer:</b><p>@workshopDetails.PhoneNumber</p>
+			@{
+				string? specializationsString = "";
+
+				if (workshopDetails.Specializations is not null)
+				{
+					List<string> specializations = new();
+
+					foreach (SpecializationDTO specialization in workshopDetails.Specializations)
+					{
+						specializations.Add(specialization.Name);
+					}
+
+					specializationsString = string.Join(", ", specializations);
+				}
+			}
+
+			<b>Specialiseringer:</b>
+			@if (string.IsNullOrWhiteSpace(specializationsString)) 
+			{
+				<p><i>Ingen</i></p>
+			}
+			else 
+			{
+				<p>@specializationsString</p>
+			}
+			
+			<b>Oprettet:</b> <p>@workshopDetails.CreatedDate.FormatTime()</p>
+			<b>Sidst ændret:</b> <p>@workshopDetails.UpdatedDate.FormatTime()</p>
+
+			<h4><b>Beliggenheden</b></h4>
+
+			<b>Gadenavn og husnummer:</b> <p>@workshopDetails.Address?.Street</p>
+			<b>By:</b> <p>@workshopDetails.Address?.City</p>
+			<b>Postnummer:</b> <p>@workshopDetails.Address?.PostCode</p>
+
+			<h4><b>Medlemmer</b></h4>
+
+			@if (workshopDetails.Members?.Any() ?? false)
+			{
+				<div class="accordion">
+					<div class="accordion-item">
+						<a class="btn btn-outline-light accordion-button collapsed bg-light" data-bs-toggle="collapse" data-bs-target="#collapse">Vis medlemmer</a>
+						<div class="collapse row" id="collapse">
+							@foreach (Member member in workshopDetails.Members)
+							{
+								<div class="accordion-body col">
+									<a href="/medlemmer/detaljer/@member.Id" target="_blank" class="btn btn-outline-dark w-100">@member.UserName</a>
+								</div>
+							}
+						</div>
+					</div>
+				</div>
+			}
+			else
+			{
+				<i>Ingen</i>
+			}
+
+			<hr />
+
+			<div class="row p-3 gap-2">
+				<button @onclick="NavigateToEditWorkshop" class="btn btn-danger dbr-primary-button w-100 col">Rediger</button>
+				<button @onclick="NavigateBack" class="btn btn-secondary w-100 col">Tilbage</button>
+			</div>
+		</div>
+	}
+}

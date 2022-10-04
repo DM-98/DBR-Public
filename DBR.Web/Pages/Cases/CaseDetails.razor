@@ -1,0 +1,165 @@
+﻿@page "/sager/detaljer/{CaseId?}"
+@inherits CancellableComponentBase
+
+<PageTitle>Sagsdetaljer</PageTitle>
+
+<div class="alert alert-danger fade show @(string.IsNullOrWhiteSpace(errorMessage) ? "d-none" : string.Empty)">
+	<label>@errorMessage</label>
+</div>
+
+@if (isLoading)
+{
+	<span class="loader"></span>
+}
+else
+{
+	if (caseDetails is not null)
+	{
+		<div class="container p-3 mb-3 border bg-white col-xs-12 col-sm-10 col-md-8 col-lg-6 col-xxl-4">
+			<h4 class="text-center">Hændelser</h4>
+
+			<hr />
+
+			@if (caseDetails.Incidents!.Any())
+			{
+				<div class="accordion">
+					<div class="accordion-item">
+						<a class="btn btn-outline-light accordion-button collapsed border bg-light" data-bs-toggle="collapse" data-bs-target="#collapse">Vis hændelser</a>
+						<div class="collapse" id="collapse">
+							@foreach (IncidentDTO incident in caseDetails.Incidents!.OrderByDescending(x => x.UpdatedDate).ThenByDescending(x => x.CreatedDate))
+							{
+								if (!isAuthenticated && incident.Type is IncidentType.InfoIntern)
+								{
+									continue;
+								}
+
+								<div class="card mb-2 bg-light">
+									<div class="card-body">
+										<h5 class="card-title"><b>@incident.Type.EnumToString()</b></h5>
+										<h6 class="card-subtitle mb-2 text-muted">@incident.CreatedDate.FormatTime()</h6>
+
+										<hr />
+
+										<p class="card-text">@incident.Description</p>
+										@if (incident.Attachments?.Any() ?? false)
+										{
+											<hr />
+
+											@foreach (AttachmentDTO attachment in incident.Attachments)
+											{
+												<div class="attachment-container float-start m-1">
+													@if (attachment.Type is AttachmentType.Invoice)
+													{
+														<a href="@attachment.Invoice!.InvoiceURL" target="_blank" class="me-1">Se faktura</a>
+													}
+													else if (attachment.Type is AttachmentType.Video)
+													{
+														<div class="video-wrap">
+															<a href="@attachment.Video!.VideoURL" target="_blank">
+																<video onloadeddata="generateThumbnail('@attachment.Id.ToString()')" id="@attachment.Id.ToString()" src="@attachment.Video!.VideoURL" class="me-1" />
+																<div class="play-button"></div>
+															</a>
+														</div>
+													}
+													else
+													{
+														<a href="@attachment.Image!.ImageURL" target="_blank">
+															<img src="@attachment.Image!.ImageURL" class="me-1" />
+														</a>
+													}
+												</div>
+											}
+										}
+									</div>
+								</div>
+							}
+						</div>
+					</div>
+				</div>
+			}
+			else
+			{
+				<p><i>Ingen hændelser i denne sag.</i></p>
+			}
+
+			@if (isAuthenticated)
+			{
+				<button class="btn btn-danger dbr-primary-button mt-2 w-100" @onclick="NavigateToCreateIncident">Opret ny hændelse</button>
+			}
+
+			<hr />
+
+			<h4 class="text-center">Sagsdetaljer</h4>
+
+			<hr />
+
+			<h4><b>Sagen</b></h4>
+
+			<b>Status:</b> <p style="font-weight: bold; color: @(caseDetails.Status is CaseStatus.Active ? "green" : "#990000")">@(caseDetails.Status is CaseStatus.Active ? "Aktiv" : "Lukket")</p>
+			<b>Oprettet:</b> <p>@caseDetails.CreatedDate.FormatTime()</p>
+
+			@if (caseDetails.UpdatedDate.HasValue && (caseDetails.Incidents?.Any() ?? false) && caseDetails.UpdatedDate.Value.Ticks <= caseDetails.Incidents.Last()!.CreatedDate.Ticks)
+			{
+				<b>Sidst ændring:</b> <p>@caseDetails.Incidents.Last().CreatedDate.FormatTime()</p>
+			}
+			else 
+			{
+				<b>Sidst ændring:</b> <p>@caseDetails.UpdatedDate.FormatTime()</p>
+			}
+
+			<h4><b>Kunden</b></h4>
+
+			<b>Navn:</b> <p>@caseDetails.Customer?.Name</p>
+			<b>Mobilnummer:</b> <p>@caseDetails.Customer?.PhoneNumber</p>
+
+			<h4><b>Bilen</b></h4>
+
+			<b>Nummerplade:</b> <p>@caseDetails.Customer?.Vehicle?.LicensePlate</p>
+			<b>Stelnummer:</b> <p>@caseDetails.Customer?.Vehicle?.VIN</p>
+			<b>Mærke:</b> <p>@caseDetails.Customer?.Vehicle?.Brand</p>
+			<b>Model:</b> <p>@caseDetails.Customer?.Vehicle?.Model</p>
+			<b>Årgang:</b> <p>@caseDetails.Customer?.Vehicle?.Year</p>
+			<b>Kilometertæller:</b> <p>@(caseDetails.Customer?.Vehicle?.Kilometers > 0 ? caseDetails.Customer?.Vehicle?.Kilometers : "0")</p>
+
+			@if (isAuthenticated)
+			{
+				@if (caseDetails!.Status is CaseStatus.Active)
+				{
+					<button data-bs-toggle="modal" data-bs-target="#toggleCaseModal" class="btn btn-danger dbr-primary-button w-100">Luk sagen</button>
+				}
+				else
+				{
+					<div class="row pe-3 ps-3 gap-2">
+						<button data-bs-toggle="modal" data-bs-target="#toggleCaseModal" class="btn btn-danger dbr-primary-button me-1 w-100 col">Genåbn sagen</button>
+						<button class="btn btn-danger dbr-primary-button w-100 col" @onclick="NavigateToCreateCase">Opret ny sag</button>
+					</div>
+				}
+
+				<hr />
+
+				<div class="row p-3 gap-2">
+					<button @onclick="NavigateToEditCase" class="btn btn-danger dbr-primary-button w-100 col">Rediger</button>
+					<button @onclick="NavigateBack" class="btn btn-secondary w-100 col">Tilbage</button>
+				</div>
+
+				<div class="modal fade" id="toggleCaseModal" tabindex="-1" aria-labelledby="toggleCaseModalLabel" aria-hidden="true">
+					<div class="modal-dialog">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h5 class="modal-title">@(caseDetails.Status is CaseStatus.Active ? "Luk sagen?" : "Genåbn sagen?")</h5>
+								<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+							</div>
+							<div class="modal-body">
+								Er du sikker på, at du vil @(caseDetails.Status is CaseStatus.Active ? "lukke sagen" : "genåbne sagen")?
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuller</button>
+								<button type="button" class="btn btn-danger dbr-primary-button" @onclick="ToggleCaseStatusAsync" data-bs-dismiss="modal">Opdater</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			}
+		</div>
+	}
+}
